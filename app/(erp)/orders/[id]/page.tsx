@@ -24,9 +24,9 @@ export default async function OrderDetailPage({
     notFound();
   }
 
-  const itemsCount = order.items.reduce((sum, item) => sum + Number(item.quantity), 0);
+  const itemsCount = order.items.reduce((sum: any, item: any) => sum + Number(item.quantity), 0);
 
-  const actionPanelItems = order.items.map((item) => ({
+  const actionPanelItems = order.items.map((item: any) => ({
     productId: item.productId,
     quantity: Number(item.quantity),
     product: { name: item.product.name },
@@ -196,7 +196,7 @@ export default async function OrderDetailPage({
           <div className="bg-card border border-border rounded-xl p-6 shadow-xs space-y-4">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Order Lifecycle Timeline</h3>
             <div className="relative border-l border-border pl-6 ml-3 space-y-6 py-2 text-xs">
-              {steps.map((step, idx) => (
+              {steps.map((step: any, idx: any) => (
                 <div key={idx} className="relative">
                   {/* Circular Node */}
                   <span className={`absolute -left-[30px] top-1 h-4.5 w-4.5 rounded-full border-2 flex items-center justify-center ${

@@ -100,7 +100,7 @@ export default async function FinishedGoodsPage({
                 </td>
               </tr>
             ) : (
-              finishedGoods.map((fg, idx) => (
+              finishedGoods.map((fg: any, idx: any) => (
                 <tr key={fg.id} className="hover:bg-muted/20 transition-colors">
                   <td className="px-5 py-3.5 font-medium text-muted-foreground text-xs">
                     {String((page - 1) * pageSize + idx + 1).padStart(2, "0")}

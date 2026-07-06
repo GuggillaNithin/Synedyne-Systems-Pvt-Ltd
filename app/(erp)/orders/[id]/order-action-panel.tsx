@@ -51,10 +51,10 @@ export function OrderActionPanel({ orderId, status, items }: OrderActionPanelPro
 
   const handleDispatch = async () => {
     setLoading(true);
-    const totalQty = items.reduce((sum, i) => sum + i.quantity, 0);
+    const totalQty = items.reduce((sum: any, i: any) => sum + i.quantity, 0);
     const dispatchData = {
       actualQty: totalQty,
-      items: items.map((i) => ({
+      items: items.map((i: any) => ({
         productId: i.productId,
         quantity: i.quantity,
       })),

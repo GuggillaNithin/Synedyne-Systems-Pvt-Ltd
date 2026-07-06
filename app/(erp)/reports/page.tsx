@@ -34,7 +34,7 @@ export default async function ReportsPage() {
   });
 
   // Prepare CSV payloads for client-side download
-  const inventoryCSVData = inventory.map(item => ({
+  const inventoryCSVData = inventory.map((item: any) => ({
     "Component Code": item.component.code,
     "Component Name": item.component.name,
     "Warehouse": item.warehouse,
@@ -46,7 +46,7 @@ export default async function ReportsPage() {
     "Remarks": item.remarks || "OK"
   }));
 
-  const revenueCSVData = revenue.map(item => ({
+  const revenueCSVData = revenue.map((item: any) => ({
     "Month": item.month,
     "Customer": item.customer.name,
     "Product": item.product.name,
@@ -56,7 +56,7 @@ export default async function ReportsPage() {
     "Payment Status": item.paymentStatus
   }));
 
-  const productionCSVData = production.map(item => ({
+  const productionCSVData = production.map((item: any) => ({
     "Product Code": item.product.code,
     "Product Name": item.product.name,
     "Planned Qty": item.plannedQty,
@@ -67,7 +67,7 @@ export default async function ReportsPage() {
     "Planned Date": item.plannedDate ? formatDate(item.plannedDate) : "—"
   }));
 
-  const dispatchCSVData = dispatches.map(item => ({
+  const dispatchCSVData = dispatches.map((item: any) => ({
     "Dispatch Date": item.dispatchDate ? formatDate(item.dispatchDate) : "—",
     "Sales Order": item.salesOrder.orderNumber,
     "Customer": item.customer.name,
@@ -77,7 +77,7 @@ export default async function ReportsPage() {
     "Status": item.status
   }));
 
-  const mrpCSVData = mrp.map(item => ({
+  const mrpCSVData = mrp.map((item: any) => ({
     "Sales Order": item.salesOrder.orderNumber,
     "Component Code": item.component.code,
     "Component Name": item.component.name,

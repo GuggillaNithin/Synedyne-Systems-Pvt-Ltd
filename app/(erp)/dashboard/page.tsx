@@ -178,7 +178,7 @@ export default async function DashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {recentOrders.map((order, idx) => (
+                {recentOrders.map((order: any, idx: any) => (
                   <tr key={order.id} className="hover:bg-muted/10 transition-colors">
                     <td className="px-5 py-3.5 font-medium">{String(idx + 1).padStart(2, "0")}</td>
                     <td className="px-5 py-3.5">
@@ -224,7 +224,7 @@ export default async function DashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {recentShortages.map((shortage, idx) => (
+                {recentShortages.map((shortage: any, idx: any) => (
                   <tr key={shortage.id} className="hover:bg-muted/10 transition-colors">
                     <td className="px-5 py-3.5 font-medium">{String(idx + 1).padStart(2, "0")}</td>
                     <td className="px-5 py-3.5">

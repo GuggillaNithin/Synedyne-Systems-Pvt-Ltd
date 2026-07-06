@@ -30,13 +30,13 @@ export default async function OrdersPage({
   const customers = await prisma.customer.findMany({ where: { deletedAt: null }, orderBy: { name: "asc" } });
   const products = await prisma.product.findMany({ where: { isActive: true }, orderBy: { name: "asc" } });
 
-  const serializedCustomers = customers.map((customer) => ({
+  const serializedCustomers = customers.map((customer: any) => ({
     id: customer.id,
     name: customer.name,
     code: customer.code,
   }));
 
-  const serializedProducts = products.map((product) => ({
+  const serializedProducts = products.map((product: any) => ({
     id: product.id,
     name: product.name,
     code: product.code,

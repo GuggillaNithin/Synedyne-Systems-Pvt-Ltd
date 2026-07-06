@@ -53,7 +53,7 @@ export function OrderCreationDialog({ customers, products }: OrderCreationDialog
   };
 
   const calculateTotal = () => {
-    return items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
+    return items.reduce((sum: any, item: any) => sum + item.quantity * item.unitPrice, 0);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -73,7 +73,7 @@ export function OrderCreationDialog({ customers, products }: OrderCreationDialog
       customerId,
       deliveryDate: deliveryDate ? new Date(deliveryDate) : undefined,
       notes,
-      items: items.map((i) => ({
+      items: items.map((i: any) => ({
         productId: i.productId,
         quantity: Number(i.quantity),
         unitPrice: Number(i.unitPrice),
@@ -188,7 +188,7 @@ export function OrderCreationDialog({ customers, products }: OrderCreationDialog
             </div>
 
             <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1">
-              {items.map((item, idx) => (
+              {items.map((item: any, idx: any) => (
                 <div key={idx} className="flex gap-2 items-center">
                   <select
                     required
@@ -197,7 +197,7 @@ export function OrderCreationDialog({ customers, products }: OrderCreationDialog
                     className="flex-1 bg-muted/30 border border-border rounded-lg px-3 py-2 text-xs text-foreground focus:outline-hidden"
                   >
                     <option value="">Select Product...</option>
-                    {products.map((p) => (
+                    {products.map((p: any) => (
                       <option key={p.id} value={p.id}>
                         {p.name} ({p.code})
                       </option>

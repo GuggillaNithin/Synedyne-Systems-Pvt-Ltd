@@ -102,7 +102,7 @@ export default async function ProductsPage({
                 </td>
               </tr>
             ) : (
-              products.map((product) => {
+              products.map((product: any) => {
                 const categoryColor = categoryColors[product.category ?? ""] ?? "bg-slate-500/10 text-slate-600 dark:text-slate-400";
                 return (
                   <tr key={product.id} className="hover:bg-muted/20 transition-colors group">
@@ -164,7 +164,7 @@ export default async function ProductsPage({
             Showing {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, total)} of {total}
           </span>
           <div className="flex items-center gap-2">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p: any) => (
               <Link
                 key={p}
                 href={`/products?q=${query}&page=${p}`}

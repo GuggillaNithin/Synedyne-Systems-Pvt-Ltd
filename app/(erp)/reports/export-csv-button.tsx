@@ -26,7 +26,7 @@ export function ExportCSVButton({ data, filename }: ExportCSVButtonProps) {
 
       // Add data rows
       for (const row of data) {
-        const values = headers.map(header => {
+        const values = headers.map((header: any) => {
           const val = row[header];
           // Escape quotes in string value
           const escaped = String(val === null || val === undefined ? "" : val).replace(/"/g, '\\"');

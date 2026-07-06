@@ -80,7 +80,7 @@ export function DashboardCharts() {
                 paddingAngle={4}
                 dataKey="value"
               >
-                {donutData.map((entry, index) => (
+                {donutData.map((entry: any, index: any) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
@@ -95,7 +95,7 @@ export function DashboardCharts() {
         </div>
 
         <div className="flex justify-around items-center pt-2 text-[10px] font-semibold border-t border-border">
-          {donutData.map((item) => (
+          {donutData.map((item: any) => (
             <div key={item.name} className="flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full" style={{ backgroundColor: item.color }} />
               <span className="text-muted-foreground">{item.name}:</span>

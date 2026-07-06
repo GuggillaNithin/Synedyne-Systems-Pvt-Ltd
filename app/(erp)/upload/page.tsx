@@ -170,7 +170,7 @@ export default function UploadPage() {
               <div className="space-y-2 pt-2">
                 <h4 className="text-xs font-semibold text-muted-foreground uppercase">Sheet Seeding Logs</h4>
                 <div className="divide-y divide-border border border-border rounded-lg bg-card overflow-hidden">
-                  {result.sheets.map((sheet) => (
+                  {result.sheets.map((sheet: any) => (
                     <div key={sheet.sheetName} className="flex justify-between items-center p-3 text-xs">
                       <div className="flex items-center gap-2">
                         <FileText className="h-4 w-4 text-muted-foreground" />

@@ -98,7 +98,7 @@ export default async function BOMPage({
                     No components mapped to this product in the Bill of Materials.
                   </div>
                 ) : (
-                  bomTree.map((group) => (
+                  bomTree.map((group: any) => (
                     <div key={group.pcba} className="bg-card border border-border rounded-xl shadow-xs overflow-hidden">
                       <div className="px-5 py-4 border-b border-border bg-muted/10 flex items-center justify-between">
                         <span className="font-semibold text-xs text-foreground flex items-center gap-2">

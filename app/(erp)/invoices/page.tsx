@@ -107,7 +107,7 @@ export default async function InvoicesPage({
           />
         </form>
         <div className="flex items-center gap-2">
-          {["", "DRAFT", "SENT", "PAID", "OVERDUE", "CANCELLED"].map((s) => (
+          {["", "DRAFT", "SENT", "PAID", "OVERDUE", "CANCELLED"].map((s: any) => (
             <a
               key={s || "all"}
               href={`/invoices?status=${s}&q=${query}`}
@@ -147,7 +147,7 @@ export default async function InvoicesPage({
                 </td>
               </tr>
             ) : (
-              invoices.map((invoice) => {
+              invoices.map((invoice: any) => {
                 const statusConf = INVOICE_STATUS_CONFIG[invoice.status as keyof typeof INVOICE_STATUS_CONFIG];
                 const balanceDue = Number(invoice.totalAmount) - Number(invoice.paidAmount);
                 return (
