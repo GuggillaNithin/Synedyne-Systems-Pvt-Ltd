@@ -1,0 +1,673 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  OPERATOR
+  VIEWER
+}
+
+enum OrderStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  IN_PRODUCTION
+  DISPATCHED
+  INVOICED
+  CANCELLED
+}
+
+enum ProductionStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  REJECTED
+  ON_HOLD
+}
+
+enum EMSBuildStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  REJECTED
+}
+
+enum DispatchStatus {
+  PENDING
+  PARTIAL
+  DISPATCHED
+  DELIVERED
+  RETURNED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PAID
+  PENDING
+  OVERDUE
+}
+
+enum POStatus {
+  OPEN
+  CLOSED
+  CANCELLED
+  PENDING
+}
+
+enum PurchaseRequestStatus {
+  PENDING
+  APPROVED
+  ORDERED
+  RECEIVED
+  CANCELLED
+}
+
+enum InventoryTransactionType {
+  RECEIVE
+  ISSUE
+  RESERVE
+  RELEASE
+  ADJUST
+  TRANSFER
+}
+
+enum NotificationType {
+  LOW_STOCK
+  ORDER_CREATED
+  ORDER_APPROVED
+  PRODUCTION_STARTED
+  PRODUCTION_COMPLETED
+  DISPATCH_COMPLETED
+  INVOICE_GENERATED
+  PAYMENT_RECEIVED
+  MATERIAL_SHORTAGE
+  PURCHASE_REQUEST
+  SUCCESS
+  WARNING
+  ERROR
+  INFO
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  APPROVE
+  REJECT
+  CANCEL
+  DISPATCH
+  RECEIVE
+  IMPORT
+}
+
+// ============================================================
+// USERS
+// ============================================================
+
+model User {
+  id          String   @id @default(uuid())
+  clerkId     String   @unique
+  email       String   @unique
+  name        String
+  role        UserRole @default(VIEWER)
+  avatarUrl   String?
+  department  String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  notifications  Notification[]
+  auditLogs      AuditLog[]
+  productionLogs ProductionLog[]
+
+  @@index([clerkId])
+  @@index([email])
+  @@map("users")
+}
+
+// ============================================================
+// CUSTOMERS
+// ============================================================
+
+model Customer {
+  id           String    @id @default(uuid())
+  code         String    @unique
+  name         String
+  contactName  String?
+  email        String?
+  phone        String?
+  address      String?
+  city         String?
+  country      String    @default("India")
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  salesOrders    SalesOrder[]
+  customerDemand CustomerDemand[]
+  dispatches     Dispatch[]
+  invoices       Invoice[]
+  revenue        Revenue[]
+
+  @@index([code])
+  @@map("customers")
+}
+
+// ============================================================
+// PRODUCTS
+// ============================================================
+
+model Product {
+  id           String    @id @default(uuid())
+  code         String    @unique
+  name         String
+  category     String?
+  sellingPrice Decimal   @default(0) @db.Decimal(12, 2)
+  unit         String    @default("pcs")
+  description  String?
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  bomItems         BOMItem[]
+  salesOrderItems  SalesOrderItem[]
+  productionOrders ProductionOrder[]
+  finishedGoods    FinishedGood[]
+  customerDemand   CustomerDemand[]
+  revenue          Revenue[]
+  dispatchItems    DispatchItem[]
+
+  @@index([code])
+  @@map("products")
+}
+
+// ============================================================
+// COMPONENTS
+// ============================================================
+
+model Component {
+  id              String    @id @default(uuid())
+  code            String    @unique
+  name            String
+  category        String
+  manufacturer    String?
+  distributor     String?
+  leadTimeWeeks   Int       @default(2)
+  unit            String    @default("pcs")
+  reorderPoint    Int       @default(0)
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+
+  bomItems           BOMItem[]
+  inventory          Inventory[]
+  materialPlans      MaterialPlan[]
+  purchaseRequests   PurchaseRequest[]
+
+  @@index([code])
+  @@map("components")
+}
+
+// ============================================================
+// BILL OF MATERIALS
+// ============================================================
+
+model BOMItem {
+  id             String    @id @default(uuid())
+  productId      String
+  componentId    String
+  pcba           String?
+  qtyPerProduct  Decimal   @db.Decimal(10, 4)
+  unit           String    @default("pcs")
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  product    Product   @relation(fields: [productId], references: [id])
+  component  Component @relation(fields: [componentId], references: [id])
+
+  @@unique([productId, componentId])
+  @@index([productId])
+  @@index([componentId])
+  @@map("bom_items")
+}
+
+// ============================================================
+// INVENTORY
+// ============================================================
+
+model Inventory {
+  id             String    @id @default(uuid())
+  componentId    String
+  warehouse      String    @default("Raw Material Store")
+  openingStock   Int       @default(0)
+  currentStock   Int       @default(0)
+  reservedStock  Int       @default(0)
+  stockAtEMS     Int       @default(0)
+  reorderPoint   Int       @default(0)
+  remarks        String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  component     Component              @relation(fields: [componentId], references: [id])
+  transactions  InventoryTransaction[]
+
+  @@unique([componentId, warehouse])
+  @@index([componentId])
+  @@map("inventory")
+}
+
+model InventoryTransaction {
+  id              String                   @id @default(uuid())
+  inventoryId     String
+  transactionType InventoryTransactionType
+  quantity        Int
+  balanceAfter    Int
+  referenceType   String?
+  referenceId     String?
+  notes           String?
+  createdAt       DateTime                 @default(now())
+  createdBy       String?
+
+  inventory Inventory @relation(fields: [inventoryId], references: [id])
+
+  @@index([inventoryId])
+  @@index([referenceId])
+  @@map("inventory_transactions")
+}
+
+// ============================================================
+// CUSTOMER DEMAND
+// ============================================================
+
+model CustomerDemand {
+  id                 String   @id @default(uuid())
+  customerId         String
+  productId          String
+  month              String
+  week               String
+  forecastQty        Int      @default(0)
+  confirmedOrderQty  Int      @default(0)
+  actualDispatchQty  Int      @default(0)
+  pendingQty         Int      @default(0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  customer Customer @relation(fields: [customerId], references: [id])
+  product  Product  @relation(fields: [productId], references: [id])
+
+  @@index([customerId])
+  @@index([productId])
+  @@index([month])
+  @@map("customer_demand")
+}
+
+// ============================================================
+// SALES ORDERS
+// ============================================================
+
+model SalesOrder {
+  id            String      @id @default(uuid())
+  orderNumber   String      @unique
+  customerId    String
+  status        OrderStatus @default(DRAFT)
+  orderDate     DateTime    @default(now())
+  deliveryDate  DateTime?
+  notes         String?
+  approvedBy    String?
+  approvedAt    DateTime?
+  totalAmount   Decimal     @default(0) @db.Decimal(12, 2)
+  createdBy     String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  deletedAt     DateTime?
+
+  customer         Customer         @relation(fields: [customerId], references: [id])
+  items            SalesOrderItem[]
+  materialPlans    MaterialPlan[]
+  productionOrders ProductionOrder[]
+  dispatches       Dispatch[]
+  invoices         Invoice[]
+
+  @@index([customerId])
+  @@index([orderNumber])
+  @@index([status])
+  @@map("sales_orders")
+}
+
+model SalesOrderItem {
+  id           String   @id @default(uuid())
+  salesOrderId String
+  productId    String
+  quantity     Int
+  unitPrice    Decimal  @db.Decimal(12, 2)
+  totalPrice   Decimal  @db.Decimal(12, 2)
+  deliveredQty Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  salesOrder SalesOrder @relation(fields: [salesOrderId], references: [id], onDelete: Cascade)
+  product    Product    @relation(fields: [productId], references: [id])
+
+  @@index([salesOrderId])
+  @@index([productId])
+  @@map("sales_order_items")
+}
+
+// ============================================================
+// MATERIAL PLANNING
+// ============================================================
+
+model MaterialPlan {
+  id                String   @id @default(uuid())
+  salesOrderId      String
+  componentId       String
+  grossRequirement  Int      @default(0)
+  currentStock      Int      @default(0)
+  stockAtEMS        Int      @default(0)
+  availableStock    Int      @default(0)
+  netRequirement    Int      @default(0)
+  shortageQty       Int      @default(0)
+  weeklyRequirement Int      @default(0)
+  leadTimeWeeks     Int      @default(0)
+  shortageWeek      String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  salesOrder       SalesOrder        @relation(fields: [salesOrderId], references: [id])
+  component        Component         @relation(fields: [componentId], references: [id])
+  purchaseRequests PurchaseRequest[]
+
+  @@index([salesOrderId])
+  @@index([componentId])
+  @@map("material_plans")
+}
+
+model PurchaseRequest {
+  id               String                @id @default(uuid())
+  materialPlanId   String?
+  componentId      String
+  requestedQty     Int
+  status           PurchaseRequestStatus @default(PENDING)
+  poNumber         String?
+  poStatus         POStatus?
+  orderedQty       Int                   @default(0)
+  expectedDelivery DateTime?
+  notes            String?
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+
+  materialPlan MaterialPlan? @relation(fields: [materialPlanId], references: [id])
+  component    Component     @relation(fields: [componentId], references: [id])
+
+  @@index([componentId])
+  @@index([status])
+  @@map("purchase_requests")
+}
+
+// ============================================================
+// PRODUCTION
+// ============================================================
+
+model ProductionOrder {
+  id            String           @id @default(uuid())
+  salesOrderId  String?
+  productId     String
+  plannedQty    Int
+  actualQty     Int              @default(0)
+  rejectedQty   Int              @default(0)
+  finishedQty   Int              @default(0)
+  status        ProductionStatus @default(PENDING)
+  plannedDate   DateTime?
+  startedAt     DateTime?
+  completedAt   DateTime?
+  notes         String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  salesOrder    SalesOrder?    @relation(fields: [salesOrderId], references: [id])
+  product       Product        @relation(fields: [productId], references: [id])
+  logs          ProductionLog[]
+  finishedGoods FinishedGood[]
+
+  @@index([salesOrderId])
+  @@index([productId])
+  @@index([status])
+  @@map("production_orders")
+}
+
+model ProductionLog {
+  id                String   @id @default(uuid())
+  productionOrderId String
+  logType           String
+  message           String
+  createdAt         DateTime @default(now())
+  createdBy         String?
+
+  productionOrder ProductionOrder @relation(fields: [productionOrderId], references: [id])
+  user            User?           @relation(fields: [createdBy], references: [id])
+
+  @@index([productionOrderId])
+  @@map("production_logs")
+}
+
+// ============================================================
+// EMS
+// ============================================================
+
+model EMSBuild {
+  id                  String         @id @default(uuid())
+  week                String
+  pcba                String
+  plannedQty          Int            @default(0)
+  actualQty           Int            @default(0)
+  rejectedQty         Int            @default(0)
+  goodQty             Int            @default(0)
+  dispatchToSynedyne  Int            @default(0)
+  status              EMSBuildStatus @default(PLANNED)
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  @@index([week])
+  @@index([pcba])
+  @@map("ems_builds")
+}
+
+model EMSDispatch {
+  id                  String   @id @default(uuid())
+  emsDispatchDate     DateTime
+  pcba                String
+  plannedDispatch     Int      @default(0)
+  actualDispatch      Int      @default(0)
+  receivedBySynedyne  Int      @default(0)
+  pendingQty          Int      @default(0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([pcba])
+  @@index([emsDispatchDate])
+  @@map("ems_dispatches")
+}
+
+// ============================================================
+// FINISHED GOODS
+// ============================================================
+
+model FinishedGood {
+  id                String   @id @default(uuid())
+  productionOrderId String?
+  productId         String
+  quantity          Int
+  warehouseLocation String?
+  receivedAt        DateTime @default(now())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  productionOrder ProductionOrder? @relation(fields: [productionOrderId], references: [id])
+  product         Product          @relation(fields: [productId], references: [id])
+
+  @@index([productId])
+  @@index([productionOrderId])
+  @@map("finished_goods")
+}
+
+// ============================================================
+// DISPATCH
+// ============================================================
+
+model Dispatch {
+  id             String         @id @default(uuid())
+  salesOrderId   String
+  customerId     String
+  dispatchDate   DateTime?
+  plannedQty     Int            @default(0)
+  actualQty      Int            @default(0)
+  status         DispatchStatus @default(PENDING)
+  trackingNumber String?
+  notes          String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  salesOrder SalesOrder     @relation(fields: [salesOrderId], references: [id])
+  customer   Customer       @relation(fields: [customerId], references: [id])
+  items      DispatchItem[]
+
+  @@index([salesOrderId])
+  @@index([customerId])
+  @@index([status])
+  @@map("dispatches")
+}
+
+model DispatchItem {
+  id          String   @id @default(uuid())
+  dispatchId  String
+  productId   String
+  quantity    Int
+  createdAt   DateTime @default(now())
+
+  dispatch Dispatch @relation(fields: [dispatchId], references: [id], onDelete: Cascade)
+  product  Product  @relation(fields: [productId], references: [id])
+
+  @@map("dispatch_items")
+}
+
+// ============================================================
+// INVOICES
+// ============================================================
+
+model Invoice {
+  id             String        @id @default(uuid())
+  invoiceNumber  String        @unique
+  salesOrderId   String?
+  customerId     String
+  invoiceDate    DateTime      @default(now())
+  dueDate        DateTime?
+  totalAmount    Decimal       @db.Decimal(12, 2)
+  paidAmount     Decimal       @default(0) @db.Decimal(12, 2)
+  status         InvoiceStatus @default(DRAFT)
+  notes          String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  salesOrder SalesOrder? @relation(fields: [salesOrderId], references: [id])
+  customer   Customer    @relation(fields: [customerId], references: [id])
+  revenue    Revenue[]
+
+  @@index([customerId])
+  @@index([salesOrderId])
+  @@index([status])
+  @@map("invoices")
+}
+
+// ============================================================
+// REVENUE
+// ============================================================
+
+model Revenue {
+  id            String        @id @default(uuid())
+  invoiceId     String?
+  customerId    String
+  productId     String
+  month         String
+  unitsSold     Int           @default(0)
+  sellingPrice  Decimal       @db.Decimal(12, 2)
+  revenue       Decimal       @db.Decimal(12, 2)
+  paymentStatus PaymentStatus @default(PENDING)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  invoice  Invoice?  @relation(fields: [invoiceId], references: [id])
+  customer Customer  @relation(fields: [customerId], references: [id])
+  product  Product   @relation(fields: [productId], references: [id])
+
+  @@index([customerId])
+  @@index([productId])
+  @@index([month])
+  @@map("revenue")
+}
+
+// ============================================================
+// SYSTEM
+// ============================================================
+
+model Notification {
+  id             String           @id @default(uuid())
+  type           NotificationType
+  title          String
+  message        String
+  isRead         Boolean          @default(false)
+  userId         String?
+  referenceId    String?
+  referenceType  String?
+  createdAt      DateTime         @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([isRead])
+  @@map("notifications")
+}
+
+model AuditLog {
+  id         String      @id @default(uuid())
+  userId     String?
+  action     AuditAction
+  entity     String
+  entityId   String?
+  oldValue   Json?
+  newValue   Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime    @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([entity, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
