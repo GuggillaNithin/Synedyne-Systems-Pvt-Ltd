@@ -49,7 +49,7 @@ export default async function BOMPage({
               {products.length === 0 ? (
                 <div className="text-xs text-muted-foreground py-4 text-center">No products seeded.</div>
               ) : (
-                products.map((p) => {
+                products.map((p: (typeof products)[number]) => {
                   const isSelected = p.id === selectedProductId;
                   return (
                     <Link
