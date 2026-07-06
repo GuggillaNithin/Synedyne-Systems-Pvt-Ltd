@@ -22,7 +22,7 @@ export default async function BOMPage({
   });
 
   const selectedProductId = params.productId || products[0]?.id;
-  const selectedProduct = products.find((p) => p.id === selectedProductId);
+  const selectedProduct = products.find((p: (typeof products)[number]) => p.id === selectedProductId);
 
   // Fetch BOM tree grouped by PCBA
   const bomTree = selectedProductId 
