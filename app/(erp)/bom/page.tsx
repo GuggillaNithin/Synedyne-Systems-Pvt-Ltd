@@ -120,7 +120,7 @@ export default async function BOMPage({
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
-                          {group.items.map((item) => (
+                          {group.items.map((item: (typeof group.items)[number]) => (
                             <tr key={item.id} className="hover:bg-muted/5 transition-colors">
                               <td className="px-5 py-3.5 font-bold text-foreground">{item.component.code}</td>
                               <td className="px-5 py-3.5 text-muted-foreground">{item.component.name}</td>
