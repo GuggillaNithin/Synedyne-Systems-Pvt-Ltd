@@ -41,8 +41,8 @@ export default async function FinishedGoodsPage({
   ]);
 
   // Aggregate totals
-  const totalQty = finishedGoods.reduce((sum, fg) => sum + fg.quantity, 0);
-  const uniqueProducts = new Set(finishedGoods.map((fg) => fg.productId)).size;
+  const totalQty = finishedGoods.reduce((sum: number, fg: any) => sum + fg.quantity, 0);
+  const uniqueProducts = new Set(finishedGoods.map((fg: any) => fg.productId)).size;
 
   return (
     <div className="space-y-6">
