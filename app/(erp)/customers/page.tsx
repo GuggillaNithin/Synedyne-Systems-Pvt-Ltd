@@ -47,7 +47,7 @@ export default async function CustomersDemandPage() {
               {customers.length === 0 ? (
                 <div className="text-xs text-muted-foreground py-4 text-center">No customers seeded.</div>
               ) : (
-                customers.map((c) => (
+                customers.map((c: (typeof customers)[number]) => (
                   <div key={c.id} className="py-3 flex justify-between items-center text-xs">
                     <div>
                       <div className="font-semibold text-foreground">{c.name}</div>
