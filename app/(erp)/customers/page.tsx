@@ -93,7 +93,7 @@ export default async function CustomersDemandPage() {
                       </td>
                     </tr>
                   ) : (
-                    demands.map((d) => (
+                    demands.map((d: (typeof demands)[number]) => (
                       <tr key={d.id} className="hover:bg-muted/5 transition-colors">
                         <td className="px-5 py-3.5 font-medium text-foreground">{d.customer.name}</td>
                         <td className="px-5 py-3.5">
